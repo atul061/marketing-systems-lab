@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UTM Link Builder</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#172744;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}main{max-width:740px;margin:40px auto;padding:20px}h1{font-size:clamp(2rem,6vw,3rem);margin:.2em 0}p{line-height:1.5;color:#53627b}.tag{color:#24438e;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:.8rem}.card{background:white;border:1px solid #dce3ee;border-radius:16px;padding:26px;box-shadow:0 12px 30px #24438e12}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.wide{grid-column:1/-1}label{display:block;font-weight:650;margin:0 0 7px}input{width:100%;padding:12px;border:1px solid #b9c5d7;border-radius:8px;font:inherit}input:focus{outline:3px solid #e8a62377}small{color:#647188}button{border:0;border-radius:8px;padding:13px 18px;font:inherit;font-weight:700;cursor:pointer}.build{background:#24438e;color:white;margin-top:22px}.copy{background:#e8a623}.result{border-top:1px solid #e2e7f0;margin-top:25px;padding-top:20px}.row{display:flex;gap:10px}#status{min-height:1.5em;color:#24438e}@media(max-width:580px){main{margin:10px auto}.card{padding:18px}.grid{grid-template-columns:1fr}.row{flex-direction:column}}
+</style>
+</head>
+<body><main>
+<p class="tag">Marketing Systems Lab</p><h1>UTM Link Builder</h1>
+<p>Create consistent campaign links. Add a destination and tracking labels, then copy the result.</p>
+<div class="card"><form id="builder"><div class="grid">
+<div class="wide"><label for="destination">Destination URL *</label><input id="destination" type="url" placeholder="https://example.com/course" required><small>Include https://.</small></div>
+<div><label for="source">Source *</label><input id="source" placeholder="instagram" required></div>
+<div><label for="medium">Medium *</label><input id="medium" placeholder="organic_social" required></div>
+<div class="wide"><label for="campaign">Campaign *</label><input id="campaign" placeholder="pmp_2027_launch" required><small>Keep this name consistent across channels.</small></div>
+<div><label for="content">Content</label><input id="content" placeholder="faculty_reel_01"></div>
+<div><label for="term">Term</label><input id="term" placeholder="optional_keyword"></div>
+</div><button class="build" type="submit">Build link</button></form>
+<div class="result"><label for="output">Your tracked link</label><div class="row"><input id="output" readonly placeholder="Your link will appear here"><button class="copy" id="copy" type="button">Copy link</button></div><p id="status" role="status"></p></div></div>
+<p><small>Runs in your browser. Entries are not stored or sent to a server. Existing URL parameters and fragments are preserved.</small></p>
+</main><script>
+const form=document.getElementById('builder'),output=document.getElementById('output'),status=document.getElementById('status');
+form.addEventListener('submit',function(event){event.preventDefault();try{const url=new URL(document.getElementById('destination').value.trim());if(!['http:','https:'].includes(url.protocol))throw Error('Enter an http or https URL.');for(const key of ['source','medium','campaign','content','term']){const value=document.getElementById(key).value.trim().toLowerCase().replace(/\s+/g,'_');if(value)url.searchParams.set('utm_'+key,value);else url.searchParams.delete('utm_'+key)}output.value=url.toString();status.textContent='Link ready to copy.'}catch(error){output.value='';status.textContent=error.message||'Check the URL.'}});
+document.getElementById('copy').addEventListener('click',async function(){if(!output.value){status.textContent='Build a link first.';return}try{await navigator.clipboard.writeText(output.value);status.textContent='Copied to clipboard.'}catch(error){output.focus();output.select();status.textContent='Select and copy the link above.'}});
+</script></body></html>
