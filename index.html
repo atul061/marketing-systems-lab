@@ -3,25 +3,204 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>UTM Link Builder</title>
+<meta name="description" content="Build campaign links that follow LevelUp's v7 UTM rules: Title Case sources, the 11 mediums and the campaign naming pattern.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{font-family:system-ui,sans-serif;color:#172744;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}main{max-width:740px;margin:40px auto;padding:20px}h1{font-size:clamp(2rem,6vw,3rem);margin:.2em 0}p{line-height:1.5;color:#53627b}.tag{color:#24438e;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:.8rem}.card{background:white;border:1px solid #dce3ee;border-radius:16px;padding:26px;box-shadow:0 12px 30px #24438e12}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.wide{grid-column:1/-1}label{display:block;font-weight:650;margin:0 0 7px}input{width:100%;padding:12px;border:1px solid #b9c5d7;border-radius:8px;font:inherit}input:focus{outline:3px solid #e8a62377}small{color:#647188}button{border:0;border-radius:8px;padding:13px 18px;font:inherit;font-weight:700;cursor:pointer}.build{background:#24438e;color:white;margin-top:22px}.copy{background:#e8a623}.result{border-top:1px solid #e2e7f0;margin-top:25px;padding-top:20px}.row{display:flex;gap:10px}#status{min-height:1.5em;color:#24438e}@media(max-width:580px){main{margin:10px auto}.card{padding:18px}.grid{grid-template-columns:1fr}.row{flex-direction:column}}
+:root{--navy:#1B2A5E;--gold:#C9961A;--cream:#FBF6EA;--paper:#F5F6FA;--ink:#18213D;--muted:#5F6A85;--line:#DFE3EE;--light:#E8ECF6;--warn:#9A6400;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+main{max-width:1120px;margin:0 auto;padding:36px 16px 60px}
+.tag{color:var(--gold);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;margin:0}
+h1{font-size:clamp(1.9rem,5vw,2.7rem);margin:.15em 0 .2em;color:var(--navy);letter-spacing:-.02em}
+.lede{color:var(--muted);max-width:640px;margin:0 0 26px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+@media(max-width:920px){.layout{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 10px 30px rgba(27,42,94,.06)}
+.step{display:flex;gap:12px;align-items:center;margin:22px 0 10px;font-weight:700;color:var(--navy)}
+.step:first-child{margin-top:0}
+.num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:.8rem;flex:none}
+.step small{font-weight:500;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:2fr 1.2fr .8fr;gap:12px}
+@media(max-width:600px){.grid,.g3{grid-template-columns:1fr}}
+.wide{grid-column:1/-1}
+label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 5px}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
+input:focus,select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,42,94,.12)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:5px;min-height:1.1em}
+.hint.warn{color:var(--warn)}
+.chip{display:inline-block;font-family:var(--mono);font-size:.82rem;background:var(--cream);color:var(--navy);padding:3px 8px;border-radius:6px;margin-top:6px;word-break:break-all}
+.out{margin-top:24px;border-top:1px solid var(--line);padding-top:20px}
+.out textarea{width:100%;min-height:86px;resize:vertical;padding:12px;border:1px solid var(--line);border-radius:10px;font-family:var(--mono);font-size:.82rem;background:var(--cream);color:var(--navy)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
+.btn.gold{background:var(--gold);color:#fff}
+.btn.ghost{background:var(--light);color:var(--navy)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+#status{font-size:.85rem;color:var(--navy);font-weight:600}
+.qr{display:flex;gap:16px;align-items:center;margin-top:16px}
+#qrbox{width:132px;height:132px;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff;display:grid;place-items:center;color:var(--muted);font-size:.75rem;text-align:center}
+#qrbox canvas{display:none!important}#qrbox img{width:114px!important;height:114px!important;display:block!important}
+aside h2{font-size:1rem;margin:0 0 10px;color:var(--navy)}
+.tags{width:100%;border-collapse:collapse;font-size:.84rem}
+.tags td{padding:8px 4px;border-top:1px solid var(--line);vertical-align:top}
+.tags td:first-child{font-family:var(--mono);font-weight:600;color:var(--navy);white-space:nowrap;padding-right:10px}
+.tags small{display:block;color:var(--muted)}
+.rules{margin:18px 0 0;padding-left:18px;font-size:.86rem}
+.rules li{margin:6px 0}
+code{font-family:var(--mono);font-size:.85em;background:var(--light);padding:1px 5px;border-radius:5px}
+.note{margin-top:16px;background:var(--cream);border-radius:12px;padding:12px 14px;font-size:.84rem;color:#5B4510}
+footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 </style>
 </head>
 <body><main>
-<p class="tag">Marketing Systems Lab</p><h1>UTM Link Builder</h1>
-<p>Create consistent campaign links. Add a destination and tracking labels, then copy the result.</p>
-<div class="card"><form id="builder"><div class="grid">
-<div class="wide"><label for="destination">Destination URL *</label><input id="destination" type="url" placeholder="https://example.com/course" required><small>Include https://.</small></div>
-<div><label for="source">Source *</label><input id="source" placeholder="instagram" required></div>
-<div><label for="medium">Medium *</label><input id="medium" placeholder="organic_social" required></div>
-<div class="wide"><label for="campaign">Campaign *</label><input id="campaign" placeholder="pmp_2027_launch" required><small>Keep this name consistent across channels.</small></div>
-<div><label for="content">Content</label><input id="content" placeholder="faculty_reel_01"></div>
-<div><label for="term">Term</label><input id="term" placeholder="optional_keyword"></div>
-</div><button class="build" type="submit">Build link</button></form>
-<div class="result"><label for="output">Your tracked link</label><div class="row"><input id="output" readonly placeholder="Your link will appear here"><button class="copy" id="copy" type="button">Copy link</button></div><p id="status" role="status"></p></div></div>
-<p><small>Runs in your browser. Entries are not stored or sent to a server. Existing URL parameters and fragments are preserved.</small></p>
-</main><script>
-const form=document.getElementById('builder'),output=document.getElementById('output'),status=document.getElementById('status');
-form.addEventListener('submit',function(event){event.preventDefault();try{const url=new URL(document.getElementById('destination').value.trim());if(!['http:','https:'].includes(url.protocol))throw Error('Enter an http or https URL.');for(const key of ['source','medium','campaign','content','term']){const value=document.getElementById(key).value.trim().toLowerCase().replace(/\s+/g,'_');if(value)url.searchParams.set('utm_'+key,value);else url.searchParams.delete('utm_'+key)}output.value=url.toString();status.textContent='Link ready to copy.'}catch(error){output.value='';status.textContent=error.message||'Check the URL.'}});
-document.getElementById('copy').addEventListener('click',async function(){if(!output.value){status.textContent='Build a link first.';return}try{await navigator.clipboard.writeText(output.value);status.textContent='Copied to clipboard.'}catch(error){output.focus();output.select();status.textContent='Select and copy the link above.'}});
-</script></body></html>
+<p class="tag">Marketing Systems Lab</p>
+<h1>UTM Link Builder</h1>
+<p class="lede">Build a campaign link in under a minute. The fields follow LevelUp's v7 UTM rules: Title Case sources, the 11 mediums and the campaign pattern, so the links match the CRM.</p>
+
+<div class="layout">
+<section class="card" aria-label="Builder">
+  <div class="step"><span class="num">1</span>Landing page</div>
+  <label for="url">Destination URL *</label>
+  <input id="url" type="url" placeholder="https://www.levelupias.com/courses/…" autocomplete="off">
+  <div class="hint" id="urlHint">Must start with https://. Other URL parameters and #anchors are kept.</div>
+
+  <div class="step"><span class="num">2</span>Parent campaign <small>utm_id</small></div>
+  <label for="uid">utm_id *</label>
+  <input id="uid" placeholder="e.g. gsf28_b01" autocomplete="off">
+  <div class="hint" id="uidHint">Format {program}{yy}_b{batch}. It must match the utm_id in that page's Zoho form.</div>
+
+  <div class="step"><span class="num">3</span>Activity <small>builds utm_campaign</small></div>
+  <div class="g3">
+    <div><label for="act">Activity *</label><select id="act"></select></div>
+    <div><label for="var">Variant (optional)</label><input id="var" placeholder="top, fac, lead…"></div>
+    <div><label for="seq">No.</label><select id="seq"></select></div>
+  </div>
+  <div class="chip" id="campChip">utm_campaign → …</div>
+
+  <div class="step"><span class="num">4</span>Creative <small>builds utm_content</small></div>
+  <div class="g3">
+    <div><label for="ctype">Creative type *</label><select id="ctype"></select></div>
+    <div><label for="cdesc">Describe it</label><input id="cdesc" placeholder="topper, jacket…"></div>
+    <div><label for="cseq">No.</label><select id="cseq"></select></div>
+  </div>
+  <div class="hint" id="cHint"></div>
+  <div class="chip" id="contChip">utm_content → …</div>
+
+  <div class="step"><span class="num">5</span>Where it's shared <small>utm_source + utm_medium</small></div>
+  <div class="grid">
+    <div><label for="src">Source *</label><select id="src"></select></div>
+    <div><label for="med">Medium *</label><select id="med"></select></div>
+    <div class="wide" id="termWrap" hidden><label for="term">utm_term (paid ads only)</label><input id="term" placeholder="keyword or ad set, e.g. upsc_coaching_delhi"></div>
+  </div>
+  <div class="hint" id="srcHint"></div>
+
+  <div class="out">
+    <label for="output">Your tracked link</label>
+    <textarea id="output" readonly placeholder="Fill the fields above and your link appears here."></textarea>
+    <div class="row">
+      <button class="btn gold" id="copy" type="button" disabled>Copy link</button>
+      <button class="btn ghost" id="dl" type="button" disabled>Download QR (PNG)</button>
+      <span id="status" role="status"></span>
+    </div>
+    <div class="qr"><div id="qrbox">QR code appears here</div>
+      <div class="hint" style="margin:0;max-width:340px">For print, shorten the link first (shorter link = cleaner QR). Team members: make official links in <b>UTM Studio</b> so they're shortened and saved to the Link Inventory.</div></div>
+  </div>
+</section>
+
+<aside class="card" aria-label="Reference">
+  <h2>The 6 tags in plain words</h2>
+  <table class="tags">
+    <tr><td>utm_id</td><td>Which big promotion?<small>One course batch · gsf28_b01</small></td></tr>
+    <tr><td>utm_campaign</td><td>Which activity?<small>{utm_id}_{activity}_{nn}_{variant}</small></td></tr>
+    <tr><td>utm_content</td><td>Which exact creative?<small>{type}_{what}_{nn} · reel_topper_01</small></td></tr>
+    <tr><td>utm_source</td><td>Where was it shared?<small>Title Case, exact spelling · Instagram</small></td></tr>
+    <tr><td>utm_medium</td><td>How was it shared?<small>One of 11 · organic_video</small></td></tr>
+    <tr><td>utm_term</td><td>Which keyword or ad set?<small>Paid ads only</small></td></tr>
+  </table>
+  <ul class="rules">
+    <li>Sources are <b>Title Case</b>: <code>Instagram</code>, not <code>instagram</code>. The CRM matches the exact spelling.</li>
+    <li>Everything else is <code>lowercase_with_underscores</code>, no spaces.</li>
+    <li>The platform goes in source, never in medium (<code>messaging</code>, not <code>whatsapp</code>).</li>
+    <li>One creative = one utm_content. New poster? New number.</li>
+    <li>Never tag links from one levelupias.com page to another.</li>
+  </ul>
+  <div class="note">Read them as one sentence: <i>For</i> utm_id, <i>during</i> utm_campaign, <i>we posted</i> utm_content <i>on</i> utm_source <i>as</i> utm_medium.</div>
+</aside>
+</div>
+<footer>Runs in your browser. Nothing you type is stored or sent anywhere. The QR code is drawn on this page.</footer>
+</main>
+<script src="vendor/qrcode.min.js"></script>
+<script>
+var D={"sources":[{"s":"Instagram","use":"Posts, reels, stories, carousels, bio link","m":["organic_social","organic_video"]},{"s":"Youtube","use":"Long videos, shorts, lives, community posts, description links","m":["organic_video","organic_social"]},{"s":"Telegram","use":"Channel / group posts","m":["messaging"]},{"s":"WhatsApp","use":"Broadcasts, reminders, AiSensy sends","m":["messaging"]},{"s":"Email","use":"Email / Brevo sends","m":["email"]},{"s":"Meta","use":"Paid ads on Instagram / Facebook","m":["paid_social"]},{"s":"Google_Ad","use":"Google Search ads and YouTube ads","m":["paid_search","paid_video"]},{"s":"Website","use":"Links on our website/blog shared outside","m":["referral"]},{"s":"Chat","use":"Website chat widget CTA","m":["chat"]},{"s":"Google_My_Business","use":"Google Business Profile / local listing","m":["organic_local"]},{"s":"Referral","use":"Partner, faculty, ranker or person sharing the link","m":["referral"]},{"s":"Newspaper","use":"Newspaper ad QR / short link","m":["offline"]},{"s":"Posters","use":"Posters, standees, boards, hoardings, jacket ads","m":["offline"]},{"s":"Handouts","use":"Pamphlets, flyers, handouts","m":["offline"]},{"s":"Seminar","use":"Offline seminar / college event / workshop venue","m":["offline"]},{"s":"Catcher","use":"Street / ground catcher team QR or short link","m":["offline"]},{"s":"Walk_in","use":"Walk-in at centre (QR at front desk)","m":["offline"]},{"s":"Inbound_call","use":"Inbound call attribution","m":["offline"]}],"mediums":[{"m":"organic_social","use":"Free social post, story, carousel, community post, bio link"},{"m":"organic_video","use":"Free video: reels, shorts, long videos, lives"},{"m":"paid_social","use":"Paid social ads"},{"m":"paid_search","use":"Paid Google Search ads"},{"m":"paid_video","use":"Paid YouTube / video ads"},{"m":"email","use":"Email sends"},{"m":"messaging","use":"WhatsApp / Telegram broadcasts and reminders"},{"m":"offline","use":"QR / short link on anything physical"},{"m":"referral","use":"Partner / person / external site"},{"m":"chat","use":"Chat widget links"},{"m":"organic_local","use":"Google Business Profile"}],"acts":[{"c":"sclr","l":"Scholarship test","v":"","src":"Instagram / Meta / WhatsApp"},{"c":"web","l":"Webinar – topper led","v":"top","src":"Youtube / Instagram / Telegram"},{"c":"web","l":"Webinar – faculty led","v":"fac","src":"Youtube / Instagram / Telegram"},{"c":"wrks","l":"Workshop – topper led","v":"top","src":"Youtube / Instagram / Telegram"},{"c":"wrks","l":"Workshop – faculty led","v":"fac","src":"Youtube / Instagram / Telegram"},{"c":"freemen","l":"Free 1:1 mentorship session","v":"","src":"Instagram / WhatsApp / Telegram"},{"c":"sem","l":"Offline seminar / college visit","v":"","src":"Seminar / Handouts"},{"c":"evt","l":"Offline event (movie screening, meetup)","v":"","src":"Posters / WhatsApp / Instagram"},{"c":"mock","l":"Open mock / test","v":"","src":"Telegram / WhatsApp / Instagram"},{"c":"wa","l":"WhatsApp campaign","v":"","src":"WhatsApp"},{"c":"tg","l":"Telegram campaign","v":"","src":"Telegram"},{"c":"email","l":"Email campaign","v":"","src":"Email"},{"c":"print","l":"Print collateral – pamphlet","v":"pamphlet","src":"Handouts"},{"c":"print","l":"Print collateral – pole banner / board","v":"pole_banner","src":"Posters"},{"c":"nw","l":"Newspaper ad","v":"","src":"Newspaper"},{"c":"ig_pos","l":"Instagram post","v":"","src":"Instagram"},{"c":"ig_ree","l":"Instagram reel","v":"","src":"Instagram"},{"c":"ig_sto","l":"Instagram story","v":"","src":"Instagram"},{"c":"ig_car","l":"Instagram carousel","v":"","src":"Instagram"},{"c":"yt_pos","l":"YouTube community post","v":"","src":"Youtube"},{"c":"yt_sho","l":"YouTube short","v":"","src":"Youtube"},{"c":"yt_lon","l":"YouTube long video","v":"","src":"Youtube"},{"c":"yt_liv","l":"YouTube live","v":"","src":"Youtube"},{"c":"webpo","l":"Website / blog post","v":"","src":"Website"},{"c":"meta","l":"Meta paid campaign – lead ads","v":"lead","src":"Meta"},{"c":"gads","l":"Google Ads – search","v":"search","src":"Google_Ad"},{"c":"gads","l":"Google Ads – YouTube","v":"youtube","src":"Google_Ad"}],"codes":[{"c":"vid","a":"Video","p":"vid_[who/what]_[nn]","e":"vid_ranker_01, vid_santosh_02"},{"c":"reel","a":"Reel","p":"reel_[who/what]_[nn]","e":"reel_topper_01"},{"c":"short","a":"Short","p":"short_[who/what]_[nn]","e":"short_faculty_01"},{"c":"gfx","a":"Graphic","p":"gfx_[purpose]_[nn]","e":"gfx_promo_01, gfx_reminder_01"},{"c":"car","a":"Carousel","p":"car_[theme]_[nn]","e":"car_benefits_01"},{"c":"story","a":"Story","p":"story_[purpose]_[nn]","e":"story_countdown_01"},{"c":"ad","a":"Ad creative","p":"ad_[angle]_[nn]","e":"ad_scholarship_01, ad_search_01"},{"c":"email","a":"Email","p":"email_[purpose]_[nn]","e":"email_invite_01, email_reminder_01"},{"c":"wa","a":"WhatsApp","p":"wa_[purpose]_[nn]","e":"wa_invite_01, wa_reminder_01"},{"c":"tg","a":"Telegram","p":"tg_[purpose]_[nn]","e":"tg_announce_01"},{"c":"qr","a":"QR","p":"qr_[placement]_[nn]","e":"qr_poster_01, qr_standee_01, qr_jacket_01"},{"c":"banner","a":"Banner","p":"banner_[placement]_[nn]","e":"banner_main_01"},{"c":"cta","a":"Chat / profile CTA","p":"cta_[place]_[nn]","e":"cta_chat_01, cta_profile_01"}],"groups":[["Social",["Instagram","Youtube"]],["Messaging",["WhatsApp","Telegram","Email"]],["Paid ads",["Meta","Google_Ad"]],["Web",["Website","Chat","Google_My_Business","Referral"]],["Offline",["Newspaper","Posters","Handouts","Seminar","Catcher","Walk_in","Inbound_call"]]]};
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  function opt(v,t,sel){return '<option value="'+v+'"'+(sel?' selected':'')+'>'+t+'</option>'}
+  function nums(){var h='';for(var i=1;i<=30;i++){var n=(i<10?'0':'')+i;h+=opt(n,n)}return h}
+  var paid=/^paid_/, tidy=/^[a-z0-9]+(_[a-z0-9]+)*$/;
+  $('act').innerHTML=opt('','— pick an activity —')+D.acts.map(function(a,i){return opt(i,a.c+(a.v?' · '+a.v:'')+' — '+a.l)}).join('');
+  $('ctype').innerHTML=opt('','— pick a creative type —')+D.codes.map(function(c){return opt(c.c,c.c+' — '+c.a)}).join('');
+  $('seq').innerHTML=nums(); $('cseq').innerHTML=nums();
+  var used={},sh='';
+  D.groups.forEach(function(g){var l=g[1].filter(function(s){return D.sources.some(function(x){return x.s===s})});l.forEach(function(s){used[s]=1});
+    if(l.length) sh+='<optgroup label="'+g[0]+'">'+l.map(function(s){return opt(s,s)}).join('')+'</optgroup>'});
+  var other=D.sources.filter(function(x){return !used[x.s]});
+  if(other.length) sh+='<optgroup label="Other">'+other.map(function(x){return opt(x.s,x.s)}).join('')+'</optgroup>';
+  $('src').innerHTML=opt('','— pick a source —')+sh;
+
+  function fillMed(){
+    var s=D.sources.filter(function(x){return x.s===$('src').value})[0], all=D.mediums.map(function(m){return m.m});
+    if(!s){$('med').innerHTML=opt('','— pick a source first —');$('srcHint').textContent='';return}
+    var rec=s.m.filter(function(m){return all.indexOf(m)>-1}), rest=all.filter(function(m){return rec.indexOf(m)<0});
+    var video=['reel','short','vid'].indexOf($('ctype').value)>-1, def=rec[0];
+    if(video&&rec.indexOf('organic_video')>-1) def='organic_video'; if(video&&rec.indexOf('paid_video')>-1) def='paid_video';
+    $('med').innerHTML=rec.map(function(m){return opt(m,m,m===def)}).join('')+(rest.length?'<optgroup label="Other mediums">'+rest.map(function(m){return opt(m,m)}).join('')+'</optgroup>':'');
+    $('srcHint').textContent=s.use?('Use '+s.s+' for: '+s.use):'';
+  }
+  function val(id){return $(id).value.trim()}
+  function build(){
+    var a=D.acts[$('act').value], c=$('ctype').value, uid=val('uid'), v=val('var'), d=val('cdesc');
+    var camp=(uid&&a)?uid+'_'+a.c+'_'+$('seq').value+(v?'_'+v:''):'';
+    var cont=c?c+'_'+(d?d+'_':'')+$('cseq').value:'';
+    $('campChip').textContent='utm_campaign → '+(camp||'…'); $('contChip').textContent='utm_content → '+(cont||'…');
+    var ct=D.codes.filter(function(x){return x.c===c})[0];
+    var badD=d&&!/^[a-z0-9_]+$/.test(d);
+    $('cHint').className='hint'+(badD?' warn':''); $('cHint').textContent=badD?'Use lowercase_with_underscores; it goes into the link exactly as typed.':(ct?'Pattern '+ct.p+(ct.e?' · e.g. '+ct.e:''):'');
+    var badU=uid&&!tidy.test(uid); $('uidHint').className='hint'+(badU?' warn':'');
+    $('uidHint').textContent=badU?'utm_id should be lowercase_with_underscores, e.g. gsf28_b01.':'Format {program}{yy}_b{batch}. It must match the utm_id in that page\'s Zoho form.';
+    var m=$('med').value; $('termWrap').hidden=!paid.test(m);
+    var out='', url;
+    try{ url=new URL(val('url')); if(!/^https?:$/.test(url.protocol)) throw 0; $('urlHint').className='hint'; $('urlHint').textContent='Must start with https://. Other URL parameters and #anchors are kept.' }
+    catch(e){ url=null; if(val('url')){ $('urlHint').className='hint warn'; $('urlHint').textContent='That doesn\'t look like a full web address. Start it with https://' } }
+    var src=$('src').value;
+    if(url&&uid&&camp&&src&&m){
+      Array.from(url.searchParams.keys()).filter(function(k){return /^utm_/i.test(k)}).forEach(function(k){url.searchParams.delete(k)});
+      [['utm_source',src],['utm_medium',m],['utm_campaign',camp],['utm_content',cont],['utm_term',paid.test(m)?val('term'):''],['utm_id',uid]]
+        .forEach(function(p){ if(p[1]) url.searchParams.append(p[0],p[1]) });
+      out=url.toString();
+    }
+    $('output').value=out; $('copy').disabled=!out; $('dl').disabled=!out; drawQr(out);
+    $('status').textContent=out?'Link ready.':'';
+  }
+  var qr=null;
+  function drawQr(t){
+    var box=$('qrbox');
+    if(!t||typeof QRCode==='undefined'){ box.innerHTML=t?'QR unavailable offline':'QR code appears here'; qr=null; return }
+    box.innerHTML=''; qr=new QRCode(box,{text:t,width:600,height:600,correctLevel:QRCode.CorrectLevel.M});
+  }
+  ['url','uid','var','cdesc','term'].forEach(function(id){$(id).addEventListener('input',build)});
+  ['act','seq','cseq','med'].forEach(function(id){$(id).addEventListener('change',build)});
+  $('act').addEventListener('change',function(){var a=D.acts[this.value];$('var').value=a?a.v:'';build()});
+  $('ctype').addEventListener('change',function(){fillMed();build()});
+  $('src').addEventListener('change',function(){fillMed();build()});
+  $('copy').addEventListener('click',function(){var t=$('output').value;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){$('status').textContent='Copied ✓'},function(){$('output').select();document.execCommand('copy');$('status').textContent='Copied ✓'})});
+  $('dl').addEventListener('click',function(){var c=$('qrbox').querySelector('canvas'),i=$('qrbox').querySelector('img');
+    var src=''; if(c){var m=Math.round(c.width/10),o=document.createElement('canvas');o.width=c.width+2*m;o.height=c.height+2*m;var x=o.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,o.width,o.height);x.drawImage(c,m,m);src=o.toDataURL('image/png')}else if(i){src=i.src} if(!src) return;
+    var a=document.createElement('a');a.href=src;a.download='qr_'+($('contChip').textContent.split('→ ')[1]||'link').replace(/[^a-z0-9_]/gi,'')+'_'+$('src').value+'.png';document.body.appendChild(a);a.click();a.remove()});
+  fillMed(); build();
+})();
+</script>
+</body></html>
